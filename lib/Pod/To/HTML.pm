@@ -10,6 +10,11 @@ sub colored($text, $how) {
     $text
 }
 
+class Pod::List is Pod::Block { };
+multi sub pw-recurse($wc, Pod::List $node, $level) {
+    $wc.pod-list(@*TEXT)
+}
+
 class Pod::To::HTML does Pod::Walker {
     has &.url-munge = -> $url { $url };
     has $!title;
@@ -27,11 +32,6 @@ class Pod::To::HTML does Pod::Walker {
         my @content = $root.?content.map: {visit $_, :&pre, :&post, :&assemble};
         $post = post($root, :@content) if defined &post;
         return assemble(:$pre, :$post, :@content, :node($root));
-    }
-
-    class Pod::List is Pod::Block { };
-    multi sub pw-recurse($wc, Pod::List $node, $level) {
-        $wc.pod-list(@*TEXT)
     }
 
     sub assemble-list-items(:@content, :$node, *% ) {
@@ -97,7 +97,7 @@ class Pod::To::HTML does Pod::Walker {
                 { "<h1 class='title'>{ $!title }</h1>"   if $!title.defined }
                 { "<p class='subtitle'>{$!subtitle}</p>" if $!subtitle.defined }
                 $.do-toc()
-                @body.join("\n")
+                @body.join()
                 $.do-footnotes()
                 $footer
             </body>
@@ -106,14 +106,14 @@ class Pod::To::HTML does Pod::Walker {
     }
 
     #= Returns accumulated metadata as a string of C«<meta>» tags
-    method do-metadata returns Str {
+    method do-metadata {
         return @!meta.map({
             q[<meta name="], .key, q[" value="], .value, q[" />]
         }).join("\n");
     }
 
     #= Turns accumulated headings into a nested-C«<ol>» table of contents
-    method do-toc returns Str {
+    method do-toc {
         my $r = qq[<nav class="indexgroup">\n];
 
         my $indent = q{ } x 2;
@@ -147,7 +147,7 @@ class Pod::To::HTML does Pod::Walker {
     #= Flushes accumulated footnotes since last call. The idea here is that we can stick calls to this
     #  before each C«</section>» tag (once we have those per-header) and have notes that are visually
     #  and semantically attached to the section.
-    method do-footnotes returns Str {
+    method do-footnotes {
         return '' unless @!footnotes;
 
         my Int $current-note = $*done-notes + 1;
@@ -247,7 +247,7 @@ class Pod::To::HTML does Pod::Walker {
             }
             default {
                 "<section>",
-                    "<h1>$name</h1>\n",
+                    "<h1>", $name, "</h1>\n",
                     @text,
                 "</section>\n"
             }
@@ -258,22 +258,22 @@ class Pod::To::HTML does Pod::Walker {
         # Ugh
     }
     method pod-para (@text) {
-        return '<p>' ~ @text ~ "</p>\n"; # XXX inline-content
+        '<p>', @text, "</p>\n"; # XXX inline-content
     }
     =begin inline
-    method pod-default (@text) returns Str {
+    method pod-default (@text) {
         node2text(@text);
     }
 
-    method pod-para (@text) returns Str {
+    method pod-para (@text) {
         return node2inline(@text);
     }
 
-    multi sub node2inline(Positional $node) returns Str {
+    multi sub node2inline(Positional $node) {
         return $node.map({ node2inline($_) }).join;
     }
 
-    multi sub node2inline(Str $node) returns Str {
+    multi sub node2inline(Str $node) {
         return escape_html($node);
     }
     =end inline
@@ -282,7 +282,7 @@ class Pod::To::HTML does Pod::Walker {
         my @r = '<table>';
 
         if %config<caption> -> $caption {
-            @r.push("<caption>$caption</caption>");
+            @r.push("<caption>", $caption, "</caption>");
         }
 
         if @headers {
@@ -343,7 +343,7 @@ class Pod::To::HTML does Pod::Walker {
         escape_html $text
     }
 
-    method pod-fcode (@text, $type, @meta) returns Str {
+    method pod-fcode (@text, $type, @meta) {
         my %basic-html = (
             B => 'strong',  #= Basis
             C => 'code',    #= Code
