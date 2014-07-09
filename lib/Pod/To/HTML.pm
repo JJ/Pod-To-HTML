@@ -64,7 +64,7 @@ class Pod::To::HTML does Pod::Walker {
         my Int $*done-notes = 0;
         my @body = $pod.map({visit $_, :assemble(&assemble-list-items)}).map({pod-walk(self, $_)});
 
-        return qq:to/EOHTML/;
+        return qq:to/EOHTML/.trim;
             <!doctype html>
             <html>
             <head>
@@ -108,7 +108,7 @@ class Pod::To::HTML does Pod::Walker {
     #= Returns accumulated metadata as a string of C«<meta>» tags
     method do-metadata {
         return @!meta.map({
-            q[<meta name="], .key, q[" value="], .value, q[" />]
+            q[<meta name="] ~ .key ~ q[" value="] ~ .value.subst("\n","",:g) ~ q[" />]
         }).join("\n");
     }
 
@@ -241,7 +241,7 @@ class Pod::To::HTML does Pod::Walker {
             when any <VERSION DESCRIPTION AUTHOR COPYRIGHT SUMMARY> {
                 @!meta.push: Pair.new(
                     key => escape_html($name.lc),
-                    value => [~] @text # XXX text-content
+                    value => de-tag [~] @text # XXX text-content
                 );
                 proceed;
             }
@@ -254,9 +254,6 @@ class Pod::To::HTML does Pod::Walker {
         }
     }
 
-    multi sub trait_mod:<has> (Routine $r, :$inline-content!) {
-        # Ugh
-    }
     method pod-para (@text) {
         '<p>', @text, "</p>\n"; # XXX inline-content
     }
@@ -316,8 +313,8 @@ class Pod::To::HTML does Pod::Walker {
     method pod-heading (@text, $level) {
         my $lvl = min($level, 6); #= HTML only has 6 levels of numbered headings
         my %escaped = (
-            id => escape_id(@text.join), # XXX rawtext-content
-            html => @text.join, # XXX inline-content
+            id => escape_id(unescape_html(de-tag(@text.join))), # XXX rawtext-content
+            html => de-tag(@text.join), # XXX inline-content
         );
 
         %escaped<uri> = uri_escape %escaped<id>;
@@ -432,6 +429,12 @@ sub unescape_html(Str $str) returns Str {
 
     $str.trans( [ rx{'&amp;'}, rx{'&lt;'}, rx{'&gt;'}, rx{'&quot;'}, rx{'&#39;'} ] =>
                 [ q{&},        q{<},       q{>},       q{"},         q{'}        ] );
+}
+
+sub de-tag(Str $str) returns Str {
+    return $str unless $str ~~ /'<'/;
+
+    $str.subst(/'<'.*?'>'/, '', :g);
 }
 
 sub escape_id ($id) {
