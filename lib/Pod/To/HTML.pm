@@ -231,7 +231,7 @@ class Pod::To::HTML does Pod::Walker {
                 unescape_html [~] @text
             }
             when 'TITLE' {
-                $!title = [~] @text;
+                $!title = de-tag [~] @text;
                 ''
             }
             when 'SUBTITLE' {
@@ -434,7 +434,7 @@ sub unescape_html(Str $str) returns Str {
 sub de-tag(Str $str) returns Str {
     return $str unless $str ~~ /'<'/;
 
-    $str.subst(/'<'.*?'>'/, '', :g);
+    $str.subst(/'<'.*?'>'\s*/, '', :g);
 }
 
 sub escape_id ($id) {
