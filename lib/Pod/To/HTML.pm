@@ -58,12 +58,11 @@ class Pod::To::HTML does Pod::Walker {
     }
 
     #= Converts a Pod tree to a HTML document.
-    method render($pod, :&!url-munge, :$head = '', :$header = '', :$footer = '', :$default-title) returns Str {
+    multi method render(Pod::To::HTML:U: |a) returns Str { self.new.render(|a) }
+    multi method render(Pod::To::HTML:D: $pod, :$head = '', :$header = '', :$footer = '', :$default-title) returns Str {
         #= Keep count of how many footnotes we've output.
         my Int $*done-notes = 0;
-        &OUTER::url-munge = &url-munge;
-        my Bool $*inline = False;
-        my @body = pod-walk self, $pod.map: {visit $_, :assemble(&assemble-list-items)};
+        my @body = $pod.map({visit $_, :assemble(&assemble-list-items)}).map({pod-walk(self, $_)});
 
         return qq:to/EOHTML/;
             <!doctype html>
@@ -108,8 +107,8 @@ class Pod::To::HTML does Pod::Walker {
 
     #= Returns accumulated metadata as a string of C«<meta>» tags
     method do-metadata returns Str {
-        return @.meta.map(-> $p {
-            qq[<meta name="{escape_html($p.key)}" value="{node2text($p.value)}" />]
+        return @!meta.map({
+            q[<meta name="], .key, q[" value="], .value, q[" />]
         }).join("\n");
     }
 
@@ -119,7 +118,7 @@ class Pod::To::HTML does Pod::Walker {
 
         my $indent = q{ } x 2;
         my @opened;
-        for @indexes -> $p {
+        for @!indexes -> $p {
             my $lvl  = $p.key;
             my $head = $p.value;
             while @opened && @opened[*-1] > $lvl {
@@ -149,16 +148,16 @@ class Pod::To::HTML does Pod::Walker {
     #  before each C«</section>» tag (once we have those per-header) and have notes that are visually
     #  and semantically attached to the section.
     method do-footnotes returns Str {
-        return '' unless @footnotes;
+        return '' unless @!footnotes;
 
         my Int $current-note = $*done-notes + 1;
-        my $notes = @footnotes.kv.map(-> $k, $v {
+        my $notes = @!footnotes.kv.map(-> $k, $v {
                         my $num = $k + $current-note;
                         qq{<li><a href="#fn-ref-$num" id="fn-$num">[↑]</a> $v </li>\n}
                     }).join;
 
-        $*done-notes += @footnotes;
-        @footnotes = ();
+        $*done-notes += @!footnotes;
+        @!footnotes = ();
 
         return qq[<aside><ol start="$current-note">\n]
              ~ $notes
@@ -168,35 +167,35 @@ class Pod::To::HTML does Pod::Walker {
     #= block level or below
     #proto sub node2html(|) returns Str is export {*}
     method pod-default (@text) {
-        return node2inline($node);
+        @text # XXX content-inline
     }
 
     method pod-declarator (@text, $wherefore) {
-        given $node.WHEREFORE {
+        given $wherefore {
             when Sub {
-                "<article>\n"
-                    ~ '<code>'
-                        ~ node2text($node.WHEREFORE.name ~ $node.WHEREFORE.signature.perl)
-                    ~ "</code>:\n"
-                    ~ node2html($node.content)
-                ~ "\n</article>\n";
+                "<article>\n",
+                    '<code>',
+                        $wherefore.name, $wherefore.signature.perl,
+                    "</code>:\n",
+                    @text,
+                "\n</article>\n";
             }
             default {
-                Debug { note "I don't know what {$node.WHEREFORE.perl} is" };
-                node2html([$node.WHEREFORE.perl, q{: }, $node.content]);
+                note "I don't know what {$wherefore.perl} is" if $!debug;
+                $wherefore.perl, ': ', @text
             }
         }
     }
 
-    method pod-code (@text) has inline-content {
-        [~] '<pre>', @text, "</pre>\n"
+    method pod-code (@text) {
+        '<pre>', @text, "</pre>\n" # XXX inline-content
     }
 
     method pod-comment (@text) {
         ''
     }
 
-    method pod-named (@text, $next, @meta, %config) {
+    method pod-named (@text, $name, :%config) {
         given $name {
             when 'config' { return '' }
             when 'nested' {
@@ -205,23 +204,23 @@ class Pod::To::HTML does Pod::Walker {
             when 'output' { "<pre>\n", @text, "</pre>\n"; } # inline-content
             when 'pod'  {
                 %config<class>
-                    ?? qq[<span class=[%config<class>]>\n], @text, qq[</span>\n]
+                    ?? (qq[<span class=[%config<class>]>\n], @text, qq[</span>\n])
                     !! @text
             }
             when 'para' { @text }
             when 'defn' { "@text[0]\n", @text[1..*-1] }
             when 'Image' {
-                say "Image block, got @text.perl()";
+                note "Image block, got @text.perl()";
                 my $url;
-                if $node.content == 1 {
-                    my $n = $node.content[0];
-                    if $n ~~ Str {
-                        $url = $n;
-                    }
-                    elsif ($n ~~ Pod::Block::Para) &&  $n.content == 1 {
-                        $url = $n.content[0] if $n.content[0] ~~ Str;
-                    }
-                }
+                #if $node.content == 1 {
+                #    my $n = $node.content[0];
+                #    if $n ~~ Str {
+                #        $url = $n;
+                #    }
+                #    elsif ($n ~~ Pod::Block::Para) &&  $n.content == 1 {
+                #        $url = $n.content[0] if $n.content[0] ~~ Str;
+                #    }
+                #}
                 unless $url.defined {
                     die "Found an Image block, but don't know how to extract the image URL :(";
                 }
@@ -232,25 +231,25 @@ class Pod::To::HTML does Pod::Walker {
                 unescape_html [~] @text
             }
             when 'TITLE' {
-                $.title = [~] @text;
+                $!title = [~] @text;
                 ''
             }
             when 'SUBTITLE' {
-                $.subtitle = [~] @text;
+                $!subtitle = [~] @text;
                 ''
             }
             when any <VERSION DESCRIPTION AUTHOR COPYRIGHT SUMMARY> {
-                @meta.push: Pair.new(
-                    key => $node.name.lc,
-                    value => $node.content
+                @!meta.push: Pair.new(
+                    key => escape_html($name.lc),
+                    value => [~] @text # XXX text-content
                 );
                 proceed;
             }
             default {
-                return '<section>'
-                    ~ "<h1>{$node.name}</h1>\n"
-                    ~ node2html($node.content)
-                    ~ "</section>\n";
+                "<section>",
+                    "<h1>$name</h1>\n",
+                    @text,
+                "</section>\n"
             }
         }
     }
@@ -258,8 +257,8 @@ class Pod::To::HTML does Pod::Walker {
     multi sub trait_mod:<has> (Routine $r, :$inline-content!) {
         # Ugh
     }
-    method pod-para (@text) has inline-content {
-        return '<p>' ~ @text ~ "</p>\n";
+    method pod-para (@text) {
+        return '<p>' ~ @text ~ "</p>\n"; # XXX inline-content
     }
     =begin inline
     method pod-default (@text) returns Str {
@@ -315,15 +314,15 @@ class Pod::To::HTML does Pod::Walker {
     # TODO: would like some way to wrap these and the following content in a <section>; this might be
     # the same way we get lists working...
     method pod-heading (@text, $level) {
-        my $lvl = min($node.level, 6); #= HTML only has 6 levels of numbered headings
+        my $lvl = min($level, 6); #= HTML only has 6 levels of numbered headings
         my %escaped = (
-            id => escape_id(node2rawtext($node.content)),
-            html => node2inline($node.content),
+            id => escape_id(@text.join), # XXX rawtext-content
+            html => @text.join, # XXX inline-content
         );
 
         %escaped<uri> = uri_escape %escaped<id>;
 
-        @indexes.push: Pair.new(key => $lvl, value => %escaped);
+        @!indexes.push: Pair.new(key => $lvl, value => %escaped);
 
         return sprintf('<h%d id="%s">', $lvl, %escaped<id>)
                     ~ qq[<a class="u" href="#___top" title="go to top of document">]
@@ -336,12 +335,12 @@ class Pod::To::HTML does Pod::Walker {
     method pod-list (@text) {
         '<ul>', @text, "</ul>\n";
     }
-    method pod-item (@text) {
+    method pod-item (@text, $level) {
         '<li>', @text, "</li>\n";
     }
 
-    method pod-plain (@text) {
-        escape_html [~] @text
+    method pod-plain ($text) {
+        escape_html $text
     }
 
     method pod-fcode (@text, $type, @meta) returns Str {
@@ -371,7 +370,7 @@ class Pod::To::HTML does Pod::Walker {
             #= Note
             when 'N' {
                 @!footnotes.push: [~] @text; # XXX inline-content
-                my $id = +@!footnotes;
+                my $id = $*done-notes + @!footnotes;
 
                 qq{<a href="#fn-$id" id="fn-ref-$id" class="footnote">[$id]</a>}
             }
@@ -391,7 +390,7 @@ class Pod::To::HTML does Pod::Walker {
                     $url = '#' ~ uri_escape( escape_id($/.postmatch) )
                 }
 
-                qq[<a href="$url">]. $text, q[</a>]
+                qq[<a href="$url">], $text, q[</a>]
             }
 
             # zero-width comment
@@ -405,11 +404,11 @@ class Pod::To::HTML does Pod::Walker {
 
             when 'X' {
                 # TODO do something with the crossrefs
-                my $text = node2inline($node.content);
-                my @indices = $node.meta;
+                my $text = [~] @text; # XXX inline-content
+                my @indices = @meta;
                 # my @indices = $defns.split(/\s*';'\s*/).map:
                 #     { .split(/\s*','\s*/).join("--") }
-                %crossrefs{$_} = $text for @indices;
+                %!crossrefs{$_} = $text for @indices;
 
                 qq[<span name="{@indices}">$text\</span>]
             }
