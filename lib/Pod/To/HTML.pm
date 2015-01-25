@@ -233,7 +233,11 @@ multi sub node2html(Pod::Block::Declarator $node) {
 
 multi sub node2html(Pod::Block::Code $node) {
     Debug { note colored("Code node2html called for ", "bold") ~ $node.gist };
-    return '<pre>' ~ node2inline($node.contents) ~ "</pre>\n"
+    return preformatted_text($node.contents);
+}
+
+sub preformatted_text($contents) {
+    return '<pre>' ~ node2inline($contents) ~ "</pre>\n";
 }
 
 multi sub node2html(Pod::Block::Comment $node) {
@@ -248,7 +252,7 @@ multi sub node2html(Pod::Block::Named $node) {
         when 'nested' {
             return qq{<div class="nested">\n} ~ node2html($node.contents) ~ qq{\n</div>\n};
         }
-        when 'output' { return "<pre>\n" ~ node2inline($node.contents) ~ "</pre>\n"; }
+        when 'output' { return preformatted_text($node.contents); }
         when 'pod'  {
             return qq[<span class="{$node.config<class>}">\n{node2html($node.contents)}</span>\n]
                 if $node.config<class>;
