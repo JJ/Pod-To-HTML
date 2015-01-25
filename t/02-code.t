@@ -40,3 +40,5 @@ This is a code block</pre>'
 '</a>' '</h1>'
 '<p>' 'Suprisingly, this is not a code block (with fancy indentation too)' '</p>'
 '<p>' 'But this is just a text. Again' '</p>']];
+
+# vim: expandtab shiftwidth=4 ft=perl6

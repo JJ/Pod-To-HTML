@@ -74,3 +74,5 @@ ok $r ~~ ms[[
         '<li>' '<p>' Beer '</p>' '</li>'
     '</ul>'
 ]];
+
+# vim: expandtab shiftwidth=4 ft=perl6

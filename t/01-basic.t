@@ -17,3 +17,5 @@ some text
 
 $r = node2html $=pod[1];
 ok $r ~~ ms/'<section>' '<h1>' foo '</h1>' '<p>' some text '</p>' '</section>'/;
+
+# vim: expandtab shiftwidth=4 ft=perl6

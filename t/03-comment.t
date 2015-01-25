@@ -13,3 +13,5 @@ This isn't a comment
 
 $r = node2html $=pod[0];
 ok $r ~~ ms/ ^ '<p>' 'This isn&#39;t a comment' '</p>' $ /;
+
+# vim: expandtab shiftwidth=4 ft=perl6
