@@ -237,7 +237,12 @@ multi sub node2html(Pod::Block::Code $node) {
 }
 
 sub preformatted_text($contents) {
-    return '<pre>' ~ node2inline($contents) ~ "</pre>\n";
+    my $tmp_fname = "/tmp/pod_to_pyg.pod";
+    my $fh = $tmp_fname.IO.open(:w);
+    spurt $fh, $contents;
+    $fh.close();
+    my $command = "pygmentize -l perl6 -f html < $tmp_fname";
+    return qqx{$command};
 }
 
 multi sub node2html(Pod::Block::Comment $node) {
