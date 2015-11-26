@@ -17,7 +17,7 @@ subtest {
 
     like(
          $html,
-         rx{'<p>' \s* '<strong>strong</strong>' \s+ 'text'},
+         rx:s{'<p>' '<strong>strong</strong>' 'text'},
          'html content'
     );
 }, 'B<> code';
@@ -34,7 +34,7 @@ subtest {
 
     like(
          $html,
-         rx{'<p>' \s* '<code>code</code>' \s+ 'text'},
+         rx:s{'<p>' '<code>code</code>' 'text'},
          'html content'
     );
 }, 'C<> code';
@@ -51,7 +51,7 @@ subtest {
 
     like(
          $html,
-         rx{'<p>' \s* '<em>em</em>' \s+ 'text'},
+         rx:s{'<p>' '<em>em</em>' 'text'},
          'html content'
     );
 }, 'I<> code';
@@ -68,7 +68,7 @@ subtest {
 
     like(
          $html,
-         rx{'<p>' \s* '<kbd>kbd</kbd>' \s+ 'text'},
+         rx:s{'<p>' '<kbd>kbd</kbd>' 'text'},
          'html content'
     );
 }, 'K<> code';
@@ -85,7 +85,7 @@ subtest {
 
     like(
          $html,
-         rx{'<p>' \s* '<var>var</var>' \s+ 'text'},
+         rx:s{'<p>' '<var>var</var>' 'text'},
          'html content'
     );
 }, 'R<> code';
@@ -103,7 +103,7 @@ subtest {
 
     like(
          $html,
-         rx{'<p>' \s* '<samp>samp</samp>' \s+ 'text'},
+         rx:s{'<p>' '<samp>samp</samp>' 'text'},
          'html content'
     );
 }, 'S<> code';
@@ -120,7 +120,7 @@ subtest {
 
     like(
          $html,
-         rx{'<p>' \s* '<u>u</u>' \s+ 'text'},
+         rx:s{'<p>' '<u>u</u>' 'text'},
          'html content'
     );
 }, 'U<> code';
@@ -137,7 +137,7 @@ subtest {
 
     like(
          $html,
-         rx{'&lt;tag&gt; &#34; &#39;'},
+         rx:s{'&lt;tag&gt; &#34; &#39;'},
          'html content'
     );
 }, 'multiple E<> codes';
@@ -154,7 +154,7 @@ subtest {
 
     like(
          $html,
-         rx{'<dfn>POD</dfn> is Plain Old Documentation.'},
+         rx:s{'<dfn>POD</dfn> is Plain Old Documentation.'},
          'html content'
     );
 }, 'D<> code';
@@ -172,13 +172,13 @@ subtest {
 
     unlike(
          $html,
-         rx{'This is ignored. '},
+         rx:s{'This is ignored. '},
          'html content does not contain contents of Z<>'
     );
 
     like(
          $html,
-         rx{'This first. But this is not.'},
+         rx:s{'This first. But this is not.'},
          'html content contains content before & after Z<>'
     );
 }, 'Z<> code';

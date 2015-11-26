@@ -23,12 +23,12 @@ subtest {
 
     like(
          $html,
-         rx{
-             '<p>' \s* 'Not nested.' \s* '</p>' \s*
-             '<div class="nested">' \s* '<p>' \s*
-             'Nested 1.' \s* '</p>' \s* '</div>' \s*
-             '<div class="nested">' \s* '<p>' \s*
-             'Nested 2.' \s* '</p>' \s* '</div>'
+         rx:s{
+             '<p>' 'Not nested.' '</p>'
+             '<div class="nested">' '<p>'
+             'Nested 1.' '</p>' '</div>'
+             '<div class="nested">' '<p>'
+             'Nested 2.' '</p>' '</div>'
            },
          'html content'
     );
@@ -58,13 +58,13 @@ subtest {
 
     like(
          $html,
-         rx{
-             '<p>' \s* 'Not nested.' \s* '</p>' \s*
-             '<div class="nested">' \s* '<p>' \s*
-             'And nested.' \s* '</p>' \s*
-             '<div class="nested">' \s* '<p>' \s*
-             'Even more nested.' \s* '</p>' \s*
-             '</div>' \s* '</div>'
+         rx:s{
+             '<p>' 'Not nested.' '</p>'
+             '<div class="nested">' '<p>'
+             'And nested.' '</p>'
+             '<div class="nested">' '<p>'
+             'Even more nested.' '</p>'
+             '</div>' '</div>'
            },
          'html content'
     );
@@ -92,11 +92,9 @@ subtest {
 
     like(
          $html,
-         rx{
+         rx:s{
              '<pre>For output.</pre>'
-             \s*
              '<pre>Straight up =output.</pre>'
-             \s*
              '<pre>In an output block.</pre>'
            },
          'html content'
@@ -125,10 +123,10 @@ subtest {
 
     like(
          $html,
-         rx{
-             '<p>' \s* 'For para.' \s* '</p>' \s*
-             '<p>' \s* 'Straight up para.' \s* '</p>' \s*
-             '<p>' \s* 'A para block is nothing special.' \s* '</p>'
+         rx:s{
+             '<p>' 'For para.' '</p>'
+             '<p>' 'Straight up para.' '</p>'
+             '<p>' 'A para block is nothing special.' '</p>'
            },
          'html content'
     );
@@ -156,11 +154,9 @@ subtest {
 
     like(
          $html,
-         rx{
+         rx:s{
              '<img src="http://www.foo.com/foo.jpg">'
-             \s*
              '<img src="http://www.bar.com/bar.jpg">'
-             \s*
              '<img src="http://www.baz.com/baz.jpg">'
            },
          'html content'
@@ -189,11 +185,9 @@ subtest {
 
     like(
          $html,
-         rx{
+         rx:s{
              '<span>For html.</span>'
-             \s*
              '<span>Straight up html.</span>'
-             \s*
              '<span>Html block.</span>'
            },
          'html content'
@@ -222,11 +216,9 @@ subtest {
 
     like(
          $html,
-         rx{
+         rx:s{
              '<span>For html.</span>'
-             \s*
              '<span>Straight up html.</span>'
-             \s*
              '<span>Html block.</span>'
            },
          'html content'
@@ -247,11 +239,10 @@ subtest {
 
     like(
          $html,
-         rx{
+         rx:s{
              '<title>Title goes here</title>'
              .+
              '<h1 class="title">Title goes here</h1>'
-             \s*
              '<h2 class="subtitle">Subtitle goes here</h1>'
            },
          'html content'
@@ -295,7 +286,7 @@ subtest {
 
         like(
             $html,
-            rx{
+            rx:s{
                 "<meta name=\"{$s.lc}\" value=\"block content for {$s}\">"
             },
             "meta tag for $s"
@@ -305,9 +296,9 @@ subtest {
 
         like(
             $html,
-            rx{
-                '<section>' \s* '<h2>' "$title-form" '</h2>' \s*
-                '<p>' \s* "block content for $s" \s* '</p>' \s*
+            rx:s{
+                '<section>' '<h2>' "$title-form" '</h2>'
+                '<p>' "block content for $s" '</p>'
                 '</section>'
             },
             "section and h2 for $s"
@@ -375,7 +366,7 @@ subtest {
 
         unlike(
             $html,
-            rx{
+            rx:s{
                 "<meta name=\"{$s.lc}\" value=\"block content for {$s}\">"
             },
             "no meta tag for $s"
@@ -385,9 +376,9 @@ subtest {
 
         like(
             $html,
-            rx{
-                '<section>' \s* '<h2>' "$title-form" '</h2>' \s*
-                '<p>' \s* "block content for $s" \s* '</p>' \s*
+            rx:s{
+                '<section>' '<h2>' "$title-form" '</h2>'
+                '<p>' "block content for $s" '</p>'
                 '</section>'
             },
             "section and h2 for $s"

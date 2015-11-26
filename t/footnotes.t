@@ -16,25 +16,25 @@ my $html = $pth.pod-to-html($=pod[0]);
 
 like(
     $html,
-    rx{
-        '<p>' \s* 'This is main text<sup>'
-        '<a href="#footnote-1" id="footnote-ref-1">1</a></sup>.' \s* '</p>' \s*
-        '<p>' \s* 'This is more main body text'
+    rx:s{
+        '<p>' 'This is main text<sup>'
+        '<a href="#footnote-1" id="footnote-ref-1">1</a></sup>.' '</p>'
+        '<p>' 'This is more main body text'
         '<sup><a href="#footnote-2" id="footnote-ref-2">2</a></sup>'
-        '. And yet more.' \s* '</p>'
+        '. And yet more.' '</p>'
     },
     'html content contains non-footnote content in the expected spots'
 );
 
 like(
     $html,
-    rx{
-        '<aside>' \s* '<ol>' \s*
-        '<li>' \s* '<a href="#footnote-ref-1" id="footnote-1">[↑]</a>' \s*
-        'And this is the first footnote.' \s* '</li>' \s*
-        '<li>' \s* '<a href="#footnote-ref-2" id="footnote-2">[↑]</a>' \s*
-        'More footnoting.' \s* '</li>' \s*
-        '</ol>' \s* '</aside>'
+    rx:s{
+        '<aside>' '<ol>'
+        '<li>' '<a href="#footnote-ref-1" id="footnote-1">[↑]</a>'
+        'And this is the first footnote.' '</li>'
+        '<li>' '<a href="#footnote-ref-2" id="footnote-2">[↑]</a>'
+        'More footnoting.' '</li>'
+        '</ol>' '</aside>'
     },
     'html content contains footnotes'
 );
