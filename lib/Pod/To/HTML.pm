@@ -43,7 +43,8 @@ class Pod::To::HTML::InlineListener does Pod::NodeListener {
             }
 
             when 'D' {
-                self.render-start-tag('dfn');
+                my $id = self.id-for( $.walker.text-contents-of($node) );
+                self.render-start-tag( 'dfn', :id($id) );
                 return True;
             }
 

@@ -154,7 +154,7 @@ subtest {
 
     like(
          $html,
-         rx:s{'<dfn>POD</dfn> is Plain Old Documentation.'},
+         rx:s{'<dfn id="POD">POD</dfn> is Plain Old Documentation.'},
          'html content'
     );
 }, 'D<> code';
