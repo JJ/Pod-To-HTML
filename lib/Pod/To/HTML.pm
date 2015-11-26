@@ -593,14 +593,9 @@ class Pod::To::HTML::Renderer is Pod::To::HTML::InlineListener {
     multi method start (Pod::Block::Table $node) {
         self.render-start-tag( 'table', :nl );
 
-        # As of 2015-11-26 $node.caption isn't populated. See
-        # https://rt.perl.org/Ticket/Display.html?id=126740. The caption in
-        # the config includes quotes from :caption('foo'). See
-        # https://rt.perl.org/Ticket/Display.html?id=126742.
-        my $caption = $node.caption // $node.config<caption>.subst( /^"'"|"'"$/, q{}, :g );
-        if $caption  {
+        if $node.caption  {
             self.render-start-tag( 'caption' );
-            $.accumulator ~= self.escape-html($caption);
+            $.accumulator ~= self.escape-html($node.caption);
             self.render-end-tag( 'caption', :nl );
         }
 
