@@ -382,12 +382,16 @@ class Pod::To::HTML::Renderer is Pod::To::HTML::InlineListener {
 
         self.render-start-tag( $tag, :id($id) );
 
+        $!render-paras = False;
+
         return True;
     }
 
     multi method end (Pod::Heading $node) {
         my $level = min( $node.level, 6 );
         my $tag = 'h' ~ $level;
+
+        $!render-paras = True;
 
         self.render-end-tag( $tag, :nl );
     }
