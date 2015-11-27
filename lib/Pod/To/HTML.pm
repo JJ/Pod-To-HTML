@@ -188,15 +188,6 @@ class Pod::To::HTML::InlineListener does Pod::NodeListener {
             when any %basic-html.keys {
                 self.render-end-tag( %basic-html{$_} );
             }
-
-            when 'E' {
-                return;
-            }
-
-            when 'N' {
-                return;
-            }
-
             when 'D' {
                 self.render-end-tag('dfn');
             }
