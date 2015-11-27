@@ -706,7 +706,6 @@ class Pod::To::HTML::Renderer is Pod::To::HTML::InlineListener {
         }
         return False
     }
-    multi method end (Pod::Raw $node) { }
 
     method config (Pod::Config $node) {  }
 }
