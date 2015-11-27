@@ -494,7 +494,10 @@ class Pod::To::HTML::Renderer is Pod::To::HTML::InlineListener {
                 return False;
             }
             when 'defn' {
-                # XXX - how to do a <dl> list sanely?
+                # XXX - this is impossible to do properly until
+                # https://rt.perl.org/Ticket/Display.html?id=126651 is
+                # fixed. Without that fix, we can't separate the term from the
+                # definition.
             }
             when 'nested' {
                 self.render-start-tag( 'div', :class('nested') );
