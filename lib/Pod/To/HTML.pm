@@ -280,7 +280,7 @@ class Pod::To::HTML::Renderer is Pod::To::HTML::InlineListener {
     }
 
     method default-prelude {
-        return qq:to/END/;
+        return Q:to/END/
         <!doctype html>
         <html>
         <head>
