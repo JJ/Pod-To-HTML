@@ -105,32 +105,35 @@ class Pod::To::HTML::InlineListener does Pod::NodeListener {
 
     method url-and-text-for (Str:D $thing) {
         given $thing {
-            #| Link to another module's documentation
+            #| Link to another module's documentation (may have an anchor)
             when /^ 'doc:' $<module> = [ <-[#]>+ ] [ '#' $<anchor> = [ .+ ] ]? $/ {
                 return (
                     self.perl6-module-uri( :module($<module>), :anchor($<anchor>) ),
                     $<anchor>.defined ?? "$<anchor> in $<module>" !! $<module>,
                 );
             }
-            #| Internal doc link
+            #| Internal doc link (may have an anchor)
             when /^ 'doc:'?  '#' $<anchor> = [ .+  ]$/ {
                 return (
                     '#' ~ self.id-for($<anchor>),
                     $<anchor>,
                 );
             }
+            #| Link to a definition in the same document
             when /^ 'defn:' $<term> = [ .+ ] $/ {
                 return (
                     '#' ~ self.id-for($<term>),
                     $<term>,
                 );
             }
+            #| Book link
             when /^ $<type> = [ 'isbn' || 'issn' ] ':' $<num> = [ .+ ] $/ {
                 return (
                     self.book-uri( :type($<type>), :num($<num>) ),
                     $<type>.uc ~ $<num>,
                 );
             }
+            #| Man page link (may have an anchor)
             when /^ 'man:' $<page> = [ .+ ] '(' $<section> = [ \d+ ] ')' [ '#' $<anchor> = [ .+ ] ]? $/ {
                 return (
                     self.man-page-uri( :page($<page>), :section($<section>), :anchor($<anchor>) ),
