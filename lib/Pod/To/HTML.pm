@@ -20,6 +20,8 @@ class Pod::To::HTML::InlineListener does Pod::NodeListener {
     # If this were in a role, it could be private.
     has Str $.accumulator is rw = q{};
     has Pod::NodeWalker $.walker = Pod::NodeWalker.new( :listener(self) );
+    has Str $.last-start-tag is rw = q{};
+    has Str $.last-end-tag is rw = q{};
 
     method pod-to-html ($pod) {
         $.walker.walk-pod($pod);
@@ -224,11 +226,15 @@ class Pod::To::HTML::InlineListener does Pod::NodeListener {
         }
         $.accumulator ~= '>';
         $.accumulator ~= "\n" if $nl;
+        $.last-start-tag = $tag;
+        $.last-end-tag = q{};
     }
 
     method render-end-tag (Cool:D $tag, :$nl = False) {
         $.accumulator ~= "</$tag>";
         $.accumulator ~= "\n" if $nl;
+        $.last-start-tag = q{};
+        $.last-end-tag = $tag;
     }
 
     my %html-escapes = (
@@ -656,8 +662,49 @@ class Pod::To::HTML::Renderer is Pod::To::HTML::InlineListener {
         %!index{$_} = $html for $node.meta;
     }
 
-    multi method start (Pod::Item $node) {  }
-    multi method end (Pod::Item $node) {  }
+    method start-list (Int :$level, Bool :$numbered) {
+        my $tag = $numbered ?? 'ol' !! 'ul';
+        # This is a nested list, in which case we unclose to the <li> that
+        # contains the nested list. We'll close it down below.
+        if $.last-end-tag eq 'li' {
+            $.accumulator.subst-mutate( rx{'</li>'\s*$}, q{} );
+        }
+        self.render-start-tag('li')
+        if $.last-start-tag ~~ <ol ul>.any;
+        self.render-start-tag( $tag, :nl );
+    }
+
+    multi method start (Pod::Item $node) {
+        # If the last end tag was a list, that means it was the end of a
+        # _nested_ list, in which case we need to close the <li> that we
+        # unclosed up in start-list above. This corresponds to POD like this:
+        #
+        # =item1 Foo
+        # =item2 Bar
+        # =item1 Baz
+        if $.last-end-tag ~~ <ol ul>.any {
+            self.render-end-tag('li');
+        }
+        self.render-start-tag('li');
+        return True;
+    }
+    multi method end (Pod::Item $node) {
+        self.render-end-tag( 'li', :nl );
+    }
+
+    method end-list (Int :$level, Bool :$numbered) {
+        my $tag = $numbered ?? 'ol' !! 'ul';
+        # If the last end tag was a list, that means it was the end of a
+        # _nested_ list, in which case we need to close the <li> that we
+        # unclosed up in start-list above. This corresponds to POD like this:
+        #
+        # =item1 Foo
+        # =item2 Bar
+        if $.last-end-tag ~~ <ol ul>.any {
+            self.render-end-tag('li');
+        }
+        self.render-end-tag( $tag, :nl );
+    }
 
     multi method start (Pod::Raw $node) {
         if $node.target && lc $node.target eq 'html' {
