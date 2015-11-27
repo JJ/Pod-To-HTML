@@ -260,7 +260,6 @@ class Pod::To::HTML::InlineListener does Pod::NodeListener {
 class Pod::To::HTML::Renderer is Pod::To::HTML::InlineListener {
     has Cool $!title;
     has Cool $!subtitle;
-    has Callable $!url-maker;
     has Cool $!prelude;
     has Cool $!postlude;
 
