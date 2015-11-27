@@ -710,6 +710,7 @@ class Pod::To::HTML::Renderer is Pod::To::HTML::InlineListener {
         if $node.target && lc $node.target eq 'html' {
             $.accumulator ~= $.walker.text-contents-of($node);
         }
+        return False
     }
     multi method end (Pod::Raw $node) { }
 
