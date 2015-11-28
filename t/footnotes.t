@@ -1,7 +1,7 @@
 use v6;
 use Test;
 use lib 'lib', 't/lib';;
-use Pod::To::HTML;
+use Pod::To::HTML::Renderer;
 
 =begin pod
 
