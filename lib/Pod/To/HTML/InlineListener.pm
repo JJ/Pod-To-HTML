@@ -208,7 +208,11 @@ method render-start-tag (Cool:D $tag, Bool :$nl = False, *%attr) {
         my @pairs = gather {
             # < emacs perl6-mode hack
             for %attr.keys.sort -> $k {
-                take self.escape-html($k) ~ q{="} ~ self.escape-html( %attr{$k} ) ~ q{"};
+                my @vals = %attr{$k} ~~ List ?? %attr{$k}.values !! %attr{$k};
+                # < emacs perl6-mode hack
+                for @vals -> $v {
+                    take self.escape-html($k) ~ q{="} ~ self.escape-html($v) ~ q{"};
+                }
             }
         };
         $.accumulator ~= @pairs.join( q{ } );
