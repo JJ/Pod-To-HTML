@@ -243,4 +243,21 @@ subtest {
     );
 }, 'mailto and http links';
 
+=begin pod
+
+L<my>
+
+=end pod
+
+subtest {
+    my $pth = Pod::To::HTML::Renderer.new;
+    my $html = $pth.pod-to-html($=pod[$pod_i++]);
+
+    like(
+        $html,
+        rx{'<a href="my">my</a>'},
+        'simple text in link should be interpreted as relative path'
+    );
+}, 'link to arbitrary text - L<my>';
+
 done-testing;
