@@ -13,10 +13,13 @@ has @!footnotes;
 has %!index;
 has Bool $!render-paras = True;
 
-submethod BUILD (:$!title? = q{},
-                 :$!subtitle? = q{},
-                 :$!prelude? = ::?CLASS.default-prelude(),
-                 :$!postlude? = ::?CLASS.default-postlude()) { }
+submethod BUILD (
+    $class:
+    :$!title = q{},
+    :$!subtitle = q{},
+    :$!prelude? = $class.default-prelude(),
+    :$!postlude? = $class.default-postlude(),
+) { }
 
 method pod-to-html ($pod) {
     callsame;
