@@ -173,7 +173,7 @@ method man-page-uri (Cool:D :$page, Cool:D :$section, Cool :$anchor) {
 }
 
 method rendered-contents-of (Pod::Block:D $node) {
-    return Pod::To::HTML::InlineListener.new.pod-to-html($node.contents);
+    return Pod::To::HTML::InlineListener.new.pod-to-html( $node.contents );
 }
 
 method handle-footnote (Pod::FormattingCode $node) { ... }

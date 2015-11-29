@@ -89,7 +89,7 @@ method inline-styles {
 method render-metadata {
     return @!meta.map(
         -> $p {
-            qq[<meta name="{self.escape-html($p.key)}" value="{self.escape-html($p.value)}">]
+            qq[<meta name="{self.escape-html( $p.key )}" value="{self.escape-html( $p.value )}">]
         }
     ).join("\n");
 }
@@ -357,7 +357,7 @@ multi method start (Pod::Block::Table $node) {
 
     if $node.caption  {
         self.render-start-tag( 'caption' );
-        $.accumulator ~= self.escape-html($node.caption);
+        $.accumulator ~= self.escape-html( $node.caption );
         self.render-end-tag( 'caption', :nl );
     }
 
@@ -401,7 +401,7 @@ method handle-footnote (Pod::FormattingCode $node) {
     self.render-end-tag('a');
     self.render-end-tag('sup');
 
-    @!footnotes.push(self.rendered-contents-of($node));
+    @!footnotes.push( self.rendered-contents-of($node) );
 }
 
 method start-index-term (Pod::FormattingCode $node) {
