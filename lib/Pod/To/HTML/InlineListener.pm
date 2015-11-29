@@ -81,20 +81,20 @@ multi method start (Pod::FormattingCode $node) {
 
 method handle-link (Pod::FormattingCode $node) {
     my $html = self.rendered-contents-of($node);
-    unless $node.meta[0] // $html {
-        die 'L<> tag with no content';
+    unless $node.meta[0] || $html {
+        die "L<> tag with no content - {$node.perl}";
     }
 
     # If the $node.meta has no content, then it was a simple tag
     # like L<doc:Module> or L<http://...>. In that case, we want
     # to use the _default_ text for that link type, rather than
     # the rendered contents.
-    my ( $url, $default_text ) = self.url-and-text-for( $node.meta[0] // $html );
+    my ( $url, $default_text ) = self.url-and-text-for( $node.meta[0] || $html );
     $html = $default_text
     unless $node.meta[0];
 
     self.render-start-tag( 'a', :href($url) );
-    $.accumulator ~= $html // $default_text;
+    $.accumulator ~= $html || $default_text;
     self.render-end-tag('a');
 }
 
