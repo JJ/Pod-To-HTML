@@ -404,11 +404,21 @@ method handle-footnote (Pod::FormattingCode $node) {
     @!footnotes.push(self.rendered-contents-of($node));
 }
 
-# XXX - this probably isn't useful without adding something like <span
-# id="index-foo">foo</span> around the content of the X<> code.
-method handle-index-term (Pod::FormattingCode $node) {
-    my $html = self.rendered-contents-of($node);
-    %!index{$_} = $html for $node.meta;
+method start-index-term (Pod::FormattingCode $node) {
+    my $term = self!term-from-node($node)
+        or return;
+    my $id = 'index-' ~ self.id-for($term);
+    $.accumulator ~= qq{<span id="$id">};
+    %!index{$term} = $id;
+}
+
+method end-index-term (Pod::FormattingCode $node) {
+    return unless self!term-from-node($node);
+    $.accumulator ~= '</span>';
+}
+
+method !term-from-node (Pod::FormattingCode $node) {
+    return $node.meta[0] || $.walker.text-contents-of($node);
 }
 
 method start-list (Int :$level, Bool :$numbered) {
@@ -463,5 +473,9 @@ multi method start (Pod::Raw $node) {
 }
 
 method config (Pod::Config $node) {  }
+
+method index {
+    return %!index;
+}
 
 # vim: expandtab shiftwidth=4 ft=perl6

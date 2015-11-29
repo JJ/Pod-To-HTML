@@ -159,6 +159,39 @@ subtest {
     );
 }, 'D<> code';
 
+=begin pod
+
+X<|dog-cat interaction>
+The X<dog> and X<cat|cats> got X<>along.
+
+=end pod
+
+subtest {
+    my $pth = Pod::To::HTML::Renderer.new;
+    my $html = $pth.pod-to-html($=pod[$pod_i++]);
+
+    like(
+         $html,
+         rx:s{
+             '<p>'
+             '<span id="index-dog-cat_interaction"></span>'
+             'The <span id="index-dog">dog</span> and'
+             '<span id="index-cats">cat</span> got along'.
+             '</p>'
+         },
+         'html content contains index spans for X<>'
+    );
+
+    is-deeply(
+        $pth.index,
+        %(
+            'dog-cat interaction' => 'index-dog-cat_interaction',
+            'dog'                 => 'index-dog',
+            'cats'                => 'index-cats',
+        ),
+        'index terms are associated with the correct IDs'
+    );
+}, 'X<> code';
 
 =begin pod
 

@@ -64,7 +64,7 @@ multi method start (Pod::FormattingCode $node) {
         }
 
         when 'X' {
-            self.handle-index-term($node);
+            self.start-index-term($node);
             return True;
         }
 
@@ -185,6 +185,9 @@ multi method end (Pod::FormattingCode $node) {
         }
         when 'D' {
             self.render-end-tag('dfn');
+        }
+        when 'X' {
+            self.end-index-term($node);
         }
     }
 }
