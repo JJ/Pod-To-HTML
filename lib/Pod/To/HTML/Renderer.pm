@@ -340,7 +340,7 @@ multi method end (Pod::Block::Named $node) {
             self.render-end-tag('pre');
             $!render-paras = True;
         }
-        when any( any(@semantic-meta-blocks), any(@semantic-blocks) ) {
+        when (@semantic-meta-blocks, @semantic-blocks).flat.any {
             self.render-end-tag( 'section', :nl );
         }
     }
