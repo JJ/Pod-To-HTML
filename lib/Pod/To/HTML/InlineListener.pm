@@ -1,4 +1,4 @@
-use Pod::NodeListener;
+use Pod::TreeWalker::Listener;
 
 #| This class only listens for inline text and does not generate block-level
 #| tags (<p>, <h1>, etc.).
@@ -7,14 +7,14 @@ use Pod::NodeListener;
 # https://rt.perl.org/Ticket/Display.html?id=124393, we can't have multi
 # methods in the role that the class shadows. Instead, this causes an error
 # from the compiler.
-unit class Pod::To::HTML::InlineListener does Pod::NodeListener;
+unit class Pod::To::HTML::InlineListener does Pod::TreeWalker::Listener;
 
-use Pod::NodeWalker;
+use Pod::TreeWalker;
 use URI::Escape;
 
 # If this were in a role, it could be private.
 has Str $.accumulator is rw = q{};
-has Pod::NodeWalker $.walker = Pod::NodeWalker.new( :listener(self) );
+has Pod::TreeWalker $.walker = Pod::TreeWalker.new( :listener(self) );
 has Str $.last-start-tag is rw = q{};
 has Str $.last-end-tag is rw = q{};
 
