@@ -10,7 +10,6 @@ use Pod::TreeWalker::Listener;
 # from the compiler.
 unit class Pod::To::HTML::InlineListener does Pod::TreeWalker::Listener;
 
-use Pod::TreeWalker;
 use URI::Escape;
 
 # If this were in a role, it could be private.
