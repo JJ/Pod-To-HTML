@@ -1,3 +1,4 @@
+use Pod::TreeWalker;
 use Pod::TreeWalker::Listener;
 
 #| This class only listens for inline text and does not generate block-level
