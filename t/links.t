@@ -260,4 +260,20 @@ subtest {
     );
 }, 'link to arbitrary text - L<my>';
 
+# Regression tests - this link was not being rendered at one point in time.
+=begin pod
+X<|behavior> L<http://www.doesnt.get.rendered.com>
+=end pod
+
+subtest {
+    my $pth = Pod::To::HTML::Renderer.new;
+    my $html = $pth.pod-to-html($=pod[$pod_i++]);
+
+    like(
+         $html,
+         rx:s{'href="http://www.doesnt.get.rendered.com"'},
+         'html content contains content link after X<>'
+    );
+}, 'X<> followed by L<>';
+
 done-testing;
