@@ -17,8 +17,8 @@ submethod BUILD (
     $class:
     :$!title = q{},
     :$!subtitle = q{},
-    :$!prelude? = $class.default-prelude(),
-    :$!postlude? = $class.default-postlude(),
+    :$!prelude? = $class.default-prelude,
+    :$!postlude? = $class.default-postlude,
 ) { }
 
 method pod-to-html ($pod) {
