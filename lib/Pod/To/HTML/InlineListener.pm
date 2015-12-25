@@ -4,10 +4,8 @@ use Pod::TreeWalker::Listener;
 #| This class only listens for inline text and does not generate block-level
 #| tags (<p>, <h1>, etc.).
 #
-# This should actually be implemented as a role, but because of
-# https://rt.perl.org/Ticket/Display.html?id=124393, we can't have multi
-# methods in the role that the class shadows. Instead, this causes an error
-# from the compiler.
+# Should this be a role? I'm not sure. It would take a bit of re-architecting
+# but it might be the right design.
 unit class Pod::To::HTML::InlineListener does Pod::TreeWalker::Listener;
 
 use URI::Escape;
