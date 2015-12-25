@@ -37,13 +37,13 @@ subtest {
             '<h1 id="Head1_with_C&lt;pod&gt;-1">Head1 with <code>pod</code></h1>'
             .*
             '<p>'
-            'Link to <a href="#Head1_with_C%26lt%3Bpod%26gt%3B-1">Head1 with <code>pod</code></a>'
+            'Link to <a href="#Head1_with_C%3Cpod%3E-1">Head1 with <code>pod</code></a>'
             '</p>'
             .*
             '<h1 id="Head1_with_B&lt;nested_C&lt;codes&gt;&gt;-2">Head1 with <strong>nested <code>codes</code></strong></h1>'
             .*
             '<p>'
-            'Link to <a href="#Head1_with_B%26lt%3Bnested_C%26lt%3Bcodes%26gt%3B%26gt%3B-2">Head1 with <strong>nested <code>codes</code></strong></a>'
+            'Link to <a href="#Head1_with_B%3Cnested_C%3Ccodes%3E%3E-2">Head1 with <strong>nested <code>codes</code></strong></a>'
             '</p>'
         },
         'expected html'
