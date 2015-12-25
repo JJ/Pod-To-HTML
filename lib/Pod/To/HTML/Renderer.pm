@@ -443,7 +443,7 @@ method handle-footnote (Pod::FormattingCode $node) {
     self.render-end-tag('a');
     self.render-end-tag('sup');
 
-    @!footnotes.push( self.rendered-contents-of($node) );
+    @!footnotes.push: self.rendered-contents-of($node);
 }
 
 method start-index-term (Pod::FormattingCode $node) {
