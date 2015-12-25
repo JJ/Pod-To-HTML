@@ -109,17 +109,24 @@ method render-toc {
     # generation, we'll make a fake POD document containing just list items
     # based on our headings. Then we render that POD to HTML and poof, we have
     # a nice, correct nested list.
-    my $fake-pod = "=begin pod\n\n=config item :numbered\n\n";
+    my @pod;
     for @!toc -> $item {
-        $fake-pod ~= "=for item{$item<level>} :numbered\n";
-        $fake-pod ~= "L<#{$item<pod>}>\n\n";
+        my $contents = $item<contents>;
+        $contents[0].contents.unshift: '#';
+
+        @pod.push: Pod::Item.new(
+            :config( :numbered('1') ),
+            :level( $item<level> ),
+            :contents(
+                Pod::FormattingCode.new(
+                    :type('L'),
+                    :contents($contents),
+                ),
+            ),
+        );
     }
-    $fake-pod ~= "\n=end pod\n";
 
-    use MONKEY-SEE-NO-EVAL;
-    my $pod = EVAL( $fake-pod ~ "\n\$=pod;" );
-
-    $renderer.pod-to-html($pod);
+    $renderer.pod-to-html(@pod);
     $renderer.render-end-tag( 'nav', :nl );
 
     return $renderer.accumulator;
@@ -169,7 +176,7 @@ multi method start (Pod::Heading $node) {
     self.render-start-tag( $tag, :id($id) );
     @!toc.push: {
         :level($level),
-        :pod( $node.contents.map( { .contents[0] } ).join(q{}) ),
+        :contents( $node.contents ),
     };
 
     $!render-paras = False;

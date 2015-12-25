@@ -17,6 +17,7 @@ has Str $.accumulator is rw = q{};
 has Pod::TreeWalker $.walker = Pod::TreeWalker.new( :listener(self) );
 has Str $.last-start-tag is rw = q{};
 has Str $.last-end-tag is rw = q{};
+has Str %known-ids;
 has Int $!id-counter = 0;
 
 method pod-to-html ($pod) {
@@ -41,7 +42,7 @@ multi method start (Pod::FormattingCode $node) {
         }
 
         when 'D' {
-            my $id = self.id-for( $.walker.text-contents-of($node) );
+            my $id = self.id-for($node);
             self.render-start-tag( 'dfn', :id($id) );
             return True;
         }
@@ -81,21 +82,43 @@ multi method start (Pod::FormattingCode $node) {
 }
 
 method handle-link (Pod::FormattingCode $node) {
-    my $html = self.rendered-contents-of($node);
-    unless $node.meta[0] || $html {
-        die "L<> tag with no content - {$node.perl}";
+    my $link = $node.meta[0] || self!raw-pod-from($node);
+    unless $link  {
+        die "L<> tag with no link - {$node.perl}";
     }
 
-    # If the $node.meta has no content, then it was a simple tag
-    # like L<doc:Module> or L<http://...>. In that case, we want
-    # to use the _default_ text for that link type, rather than
-    # the rendered contents.
-    my ( $url, $default_text ) = self.url-and-text-for( $node.meta[0] || $html );
-    $html = $default_text
-    unless $node.meta[0];
+    my ( $url, $default-text, $strip-leading ) = self.url-and-text-for($link);
 
     self.render-start-tag( 'a', :href($url) );
-    $.accumulator ~= $html || $default_text;
+
+    # There are several cases to consider here ...
+    #
+    # The link contains text to use inside the <a> tag separate from the thing
+    # which we're linking - L<foo|bar>. In that case we simply use the
+    # contents of the node for the link text (inside <a>...</a>), and
+    # $node.meta[0] contains the thing we turn into a URL.
+    #
+    # The link contains just one thing which we need to turn into a URL _and_
+    # the text to use - L<foo>. In this case $node.meta is empty and so we
+    # have to use $node.contents.
+
+    # The url-and-text-for method may either return default text for us to use
+    # inside the <a> tag _or_ it will give us a regex to be used to modify the
+    # rendered node contents.
+    #
+    # This behavior is necessary because for some types of links, like links
+    # to anchors, we need to turn the Pod objects back into text, then use
+    # that to calculate the link. For example, given the link L<#anchor with
+    # B<formatting>>, we generate the link from the raw text "#anchor with
+    # B<formatting>" but when we go to actually fill in the <a> tag we want to
+    # render that B<> code while still stripping the leading "#". Sheesh,
+    # complicated!
+    $.accumulator ~= $node.meta[0]
+        ?? self.rendered-contents-of($node)
+        !! $default-text
+        ?? self.escape-html($default-text)
+        !! self.rendered-contents-of($node).subst( $strip-leading, q{} );
+
     self.render-end-tag('a');
 }
 
@@ -109,10 +132,11 @@ method url-and-text-for (Str:D $thing) {
             );
         }
         #| Internal doc link (may have an anchor)
-        when /^ 'doc:'?  '#' $<anchor> = [ .+  ]$/ {
+        when /^ 'doc:'? '#' $<anchor> = [ .+ ]$/ {
             return (
-                '#' ~ self.id-for($<anchor>),
-                $<anchor>,
+                '#' ~ uri-escape( self.escape-html( self.id-for($<anchor>) ) ),
+                Nil,
+                rx{ ^ 'doc:'? '#' },
             );
         }
         #| Link to a definition in the same document
@@ -149,26 +173,30 @@ method url-and-text-for (Str:D $thing) {
             );
         }
         default {
-            return $thing xx 2;
+            return (
+                $thing,
+                Nil,
+                rx{^$},
+            );
         }
     }
 }
 
 method perl6-module-uri (Cool:D :$module, Cool :$anchor) {
-    my $url = "http://modules.perl6.org/dist/$module";
-    $url ~= '#' ~ $anchor if $anchor.defined;
+    my $url = 'http://modules.perl6.org/dist/' ~ uri-escape($module);
+    $url ~= '#' ~ uri-escape($anchor) if $anchor.defined;
     return $url;
 }
 
 method book-uri (Cool:D :$type, Cool:D :$num) {
     my $q = $type eq 'isbn' ?? 'isbn:' !! 'n2:';
     $q ~= $num;
-    return 'https://www.worldcat.org/q=' ~ uri_escape($q);
+    return 'https://www.worldcat.org/q=' ~ uri-escape($q);
 }
 
 method man-page-uri (Cool:D :$page, Cool:D :$section, Cool :$anchor) {
     my $url = 'http://man7.org/linux/man-pages/';
-    $url ~= 'man' ~ $section ~ '/' ~ $page ~ '.' ~ $section ~ '.html';
+    $url ~= 'man' ~ $section ~ '/' ~ uri-escape($page) ~ '.' ~ uri-escape($section) ~ '.html';
     $url ~= '#' ~ $anchor if $anchor.defined;
     return $url;
 }
@@ -248,15 +276,39 @@ method escape-html(Cool:D $str) returns Str {
 }
 
 multi method id-for (Pod::Block:D $pod) {
-    return self.escape-id( $.walker.text-contents-of($pod) );
+    return self!raw-text-to-id( self!raw-pod-from($pod) );
+}
+
+# This is only called by id-for, which in turn is only called to generate ids
+# for headings and definitions. In those cases, we do not expect any nested
+# Pod _except_ for formatting codes. In other words, a heading should not
+# contain other headings, items, etc.
+method !raw-pod-from (Pod::Block:D $pod) {
+    my @text = gather {
+        for $pod.contents -> $node {
+            given $node {
+                when Pod::FormattingCode {
+                    take $node.type ~ '<' ~ self!raw-pod-from($node) ~ '>';
+                }
+                when Str {
+                    take $node;
+                }
+                default {
+                    take self!raw-pod-from($_);
+                }
+            }
+        }
+    }
+
+    return [~] @text;
 }
 
 multi method id-for (Cool:D $thing) {
-    return self.escape-id($thing);
+    return self!raw-text-to-id($thing);
 }
 
-method escape-id ($id) {
-    return $id.subst( /\s+/, '_', :g ) ~ '-' ~ $!id-counter++;
+method !raw-text-to-id (Cool:D $raw) {
+    return %known-ids{$raw} //= $raw.subst( /\s+/, '_', :g ) ~ '-' ~ $!id-counter++;
 }
 
 # vim: expandtab shiftwidth=4 ft=perl6

@@ -29,43 +29,43 @@ subtest {
 
     like(
         $html,
-        rx{'<a href="http://modules.perl6.org/dist/Pod::To::HTML">Pod::To::HTML</a>'},
+        rx{'<a href="http://modules.perl6.org/dist/Pod%3A%3ATo%3A%3AHTML">Pod::To::HTML</a>'},
         'simple doc link'
     );
 
     like(
         $html,
-        rx{'<a href="http://modules.perl6.org/dist/Pod::To::HTML">Pod::To::HTML docs</a>'},
+        rx{'<a href="http://modules.perl6.org/dist/Pod%3A%3ATo%3A%3AHTML">Pod::To::HTML docs</a>'},
         'doc link with link text'
     );
 
     like(
         $html,
-        rx{'<a href="http://modules.perl6.org/dist/Pod::To::HTML#SYNOPSIS">SYNOPSIS in Pod::To::HTML</a>'},
+        rx{'<a href="http://modules.perl6.org/dist/Pod%3A%3ATo%3A%3AHTML#SYNOPSIS">SYNOPSIS in Pod::To::HTML</a>'},
         'doc link with anchor'
     );
 
     like(
         $html,
-        rx{'<a href="#INTERNAL1">INTERNAL1</a>'},
+        rx{'<a href="#INTERNAL1-0">INTERNAL1</a>'},
         'simple internal doc link with doc:'
     );
 
     like(
         $html,
-        rx{'<a href="#INTERNAL2">INTERNAL2</a>'},
+        rx{'<a href="#INTERNAL2-1">INTERNAL2</a>'},
         'simple internal doc link without doc:'
     );
 
     like(
         $html,
-        rx{'<a href="#INTERNAL1">Internal section 1</a>'},
+        rx{'<a href="#INTERNAL1-0">Internal section 1</a>'},
         'internal doc link with link text and doc:'
     );
 
     like(
         $html,
-        rx{'<a href="#INTERNAL2">Internal section 2</a>'},
+        rx{'<a href="#INTERNAL2-1">Internal section 2</a>'},
         'internal doc link with link text and without doc:'
     );
 }, 'doc links';
@@ -84,13 +84,13 @@ subtest {
 
     like(
         $html,
-        rx{'<a href="#lexiphania">lexiphania</a>'},
+        rx{'<a href="#lexiphania-0">lexiphania</a>'},
         'simple defn link'
     );
 
     like(
         $html,
-        rx{'<a href="#lexiphania">the word lexiphania</a>'},
+        rx{'<a href="#lexiphania-0">the word lexiphania</a>'},
         'defn link with link text'
     );
 }, 'defn links';

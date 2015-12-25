@@ -154,7 +154,7 @@ subtest {
 
     like(
          $html,
-         rx:s{'<dfn id="POD">POD</dfn> is Plain Old Documentation.'},
+         rx:s{'<dfn id="POD-0">POD</dfn> is Plain Old Documentation.'},
          'html content'
     );
 }, 'D<> code';
@@ -174,9 +174,9 @@ subtest {
          $html,
          rx:s{
              '<p>'
-             '<span id="index-dog-cat_interaction"></span>'
-             'The <span id="index-dog">dog</span> and'
-             '<span id="index-cats">cat</span> got along'.
+             '<span id="index-dog-cat_interaction-0"></span>'
+             'The <span id="index-dog-1">dog</span> and'
+             '<span id="index-cats-2">cat</span> got along'.
              '</p>'
          },
          'html content contains index spans for X<>'
@@ -185,9 +185,9 @@ subtest {
     is-deeply(
         $pth.index,
         %(
-            'dog-cat interaction' => 'index-dog-cat_interaction',
-            'dog'                 => 'index-dog',
-            'cats'                => 'index-cats',
+            'dog-cat interaction' => 'index-dog-cat_interaction-0',
+            'dog'                 => 'index-dog-1',
+            'cats'                => 'index-cats-2',
         ),
         'index terms are associated with the correct IDs'
     );
