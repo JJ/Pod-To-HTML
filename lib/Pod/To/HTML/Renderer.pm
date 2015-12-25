@@ -2,12 +2,13 @@ use Pod::To::HTML::InlineListener;
 
 unit class Pod::To::HTML::Renderer is Pod::To::HTML::InlineListener;
 
+has Bool $!include-toc;
 has Cool $!title;
 has Cool $!subtitle;
 has Cool $!prelude;
 has Cool $!postlude;
 
-has Pair @!toc;
+has Hash @!toc;
 has Pair @!meta;
 has @!footnotes;
 has %!index;
@@ -15,6 +16,7 @@ has Bool $!render-paras = True;
 
 submethod BUILD (
     $class:
+    $!include-toc = True,
     :$!title = q{},
     :$!subtitle = q{},
     :$!prelude? = $class.default-prelude,
@@ -49,13 +51,15 @@ method default-postlude {
 }
 
 method render-html {
-    return join "\n",
+    return (
         self.render-prelude,
+        self.render-toc,
         self.render-title,
         self.render-subtitle,
         $.accumulator,
         self.render-footnotes,
-        self.render-postlude;
+        self.render-postlude
+    ).grep( { .defined } ).join("\n");
 }
 
 method render-prelude returns Str:D {
@@ -92,6 +96,33 @@ method render-metadata {
             qq[<meta name="{self.escape-html( $p.key )}" value="{self.escape-html( $p.value )}">]
         }
     ).join("\n");
+}
+
+method render-toc {
+    return unless @!toc;
+
+    my $renderer = Pod::To::HTML::Renderer.new;
+    $renderer.render-start-tag( 'nav', :nl );
+
+    # We already have all the code necessary to handle nested lists in
+    # Pod::TreeWalker. Rather than repeat it all here again for HTML
+    # generation, we'll make a fake POD document containing just list items
+    # based on our headings. Then we render that POD to HTML and poof, we have
+    # a nice, correct nested list.
+    my $fake-pod = "=begin pod\n\n=config item :numbered\n\n";
+    for @!toc -> $item {
+        $fake-pod ~= "=for item{$item<level>} :numbered\n";
+        $fake-pod ~= "L<#{$item<pod>}>\n\n";
+    }
+    $fake-pod ~= "\n=end pod\n";
+
+    use MONKEY-SEE-NO-EVAL;
+    my $pod = EVAL( $fake-pod ~ "\n\$=pod;" );
+
+    $renderer.pod-to-html($pod);
+    $renderer.render-end-tag( 'nav', :nl );
+
+    return $renderer.accumulator;
 }
 
 method render-title {
@@ -136,6 +167,10 @@ multi method start (Pod::Heading $node) {
     my $tag = 'h' ~ $level;
 
     self.render-start-tag( $tag, :id($id) );
+    @!toc.push: {
+        :level($level),
+        :pod( $node.contents.map( { .contents[0] } ).join(q{}) ),
+    };
 
     $!render-paras = False;
 
