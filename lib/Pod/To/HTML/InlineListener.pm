@@ -134,7 +134,7 @@ method url-and-text-for (Str:D $thing) {
         #| Internal doc link (may have an anchor)
         when /^ 'doc:'? '#' $<anchor> = [ .+ ]$/ {
             return (
-                '#' ~ uri-escape( self.escape-html( self.id-for($<anchor>) ) ),
+                '#' ~ uri-escape( self.id-for($<anchor>) ),
                 Nil,
                 rx{ ^ 'doc:'? '#' },
             );

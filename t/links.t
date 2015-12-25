@@ -19,6 +19,10 @@ L<Internal section 1|doc:#INTERNAL1>
 
 L<Internal section 2|#INTERNAL2>
 
+L<#Has C<pod>>
+
+L<It has pod|#Has C<pod>>
+
 =end pod
 
 my $pod_i = 0;
@@ -67,6 +71,19 @@ subtest {
         $html,
         rx{'<a href="#INTERNAL2-1">Internal section 2</a>'},
         'internal doc link with link text and without doc:'
+    );
+
+    like(
+        $html,
+        rx{'<a href="#Has_C%3Cpod%3E-2">Has <code>pod</code></a>'},
+        'internal doc link which contains Pod in the link text:'
+    );
+
+    todo( 'Rakudo misparses the corresponding pod - https://rt.perl.org/Ticket/Display.html?id=127029', 1 );
+    like(
+        $html,
+        rx{'<a href="#Has_C%3Cpod%3E-2">It has pod</a>'},
+        'internal doc link which contains Pod in the link and separate link text'
     );
 }, 'doc links';
 
