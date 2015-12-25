@@ -17,6 +17,7 @@ has Str $.accumulator is rw = q{};
 has Pod::TreeWalker $.walker = Pod::TreeWalker.new( :listener(self) );
 has Str $.last-start-tag is rw = q{};
 has Str $.last-end-tag is rw = q{};
+has Int $!id-counter = 0;
 
 method pod-to-html ($pod) {
     $.walker.walk-pod($pod);
@@ -255,7 +256,7 @@ multi method id-for (Cool:D $thing) {
 }
 
 method escape-id ($id) {
-    return $id.subst( /\s+/, '_', :g );
+    return $id.subst( /\s+/, '_', :g ) ~ '-' ~ $!id-counter++;
 }
 
 # vim: expandtab shiftwidth=4 ft=perl6
