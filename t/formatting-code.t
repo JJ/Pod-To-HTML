@@ -163,6 +163,7 @@ subtest {
 
 X<|dog-cat interaction>
 The X<dog> and X<cat|cats> got X<>along.
+The X<pig|pigs; piggies ; porcine> ate food.
 
 =end pod
 
@@ -177,6 +178,7 @@ subtest {
              '<span id="index-dog-cat_interaction"></span>'
              'The <span id="index-dog">dog</span> and'
              '<span id="index-cats">cat</span> got along'.
+             'The <span id="index-pigs"><span id="index-piggies"><span id="index-porcine">pig</span></span></span> ate food'.
              '</p>'
          },
          'html content contains index spans for X<>'
@@ -188,6 +190,9 @@ subtest {
             'dog-cat interaction' => 'index-dog-cat_interaction',
             'dog'                 => 'index-dog',
             'cats'                => 'index-cats',
+            'pigs'                => 'index-pigs',
+            'piggies'             => 'index-piggies',
+            'porcine'             => 'index-porcine',
         ),
         'index terms are associated with the correct IDs'
     );

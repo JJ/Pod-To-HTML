@@ -15,6 +15,7 @@ has Str $.accumulator is rw = q{};
 has Pod::TreeWalker $.walker = Pod::TreeWalker.new( :listener(self) );
 has Str $.last-start-tag is rw = q{};
 has Str $.last-end-tag is rw = q{};
+has %!index;
 
 method pod-to-html ($pod) {
     $.walker.walk-pod($pod);
@@ -203,6 +204,34 @@ method rendered-contents-of (Pod::Block:D $node) {
 
 method handle-footnote (Pod::FormattingCode $node) { ... }
 
+method start-index-term (Pod::FormattingCode $node) {
+    my @terms = self!terms-from-node($node)
+        or return;
+
+    for @terms -> $t {
+        my $id = 'index-' ~ self.id-for($t);
+        self.render-start-tag( 'span', :id($id) );
+        %!index{$t} = $id;
+    }
+}
+
+method end-index-term (Pod::FormattingCode $node) {
+    my @terms = self!terms-from-node($node);
+    self.render-end-tag('span') for @terms;
+}
+
+method !terms-from-node (Pod::FormattingCode $node) {
+    # See https://rt.perl.org/Ticket/Display.html?id=127039 for details on
+    # this weirdness. When $node.meta contains semicolon-separated terms
+    # they end up as a set of untrimmed single-element arrays.  arrays,
+    my @terms =
+        $node.meta.elems
+        ?? $node.meta.map( { $_ ~~ Array ?? $_[0] !! $_ } )
+        !! @( $.walker.text-contents-of($node) );
+
+    return @terms.map( { $_.trim } ).grep( { $_.chars } );
+}
+
 multi method end (Pod::FormattingCode $node) {
     given $node.type {
         when any %basic-html.keys {
@@ -305,6 +334,10 @@ multi method id-for (Cool:D $thing) {
 
 method !raw-text-to-id (Cool:D $raw) {
     return $raw.subst( /\s+/, '_', :g );
+}
+
+method index {
+    return %!index;
 }
 
 # vim: expandtab shiftwidth=4 ft=perl6

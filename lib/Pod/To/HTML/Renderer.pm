@@ -11,7 +11,6 @@ has Cool $!postlude;
 has Hash @!toc;
 has Pair @!meta;
 has @!footnotes;
-has %!index;
 has Bool $!render-paras = True;
 
 submethod BUILD (
@@ -446,23 +445,6 @@ method handle-footnote (Pod::FormattingCode $node) {
     @!footnotes.push: self.rendered-contents-of($node);
 }
 
-method start-index-term (Pod::FormattingCode $node) {
-    my $term = self!term-from-node($node)
-        or return;
-    my $id = 'index-' ~ self.id-for($term);
-    $.accumulator ~= qq{<span id="$id">};
-    %!index{$term} = $id;
-}
-
-method end-index-term (Pod::FormattingCode $node) {
-    return unless self!term-from-node($node);
-    $.accumulator ~= '</span>';
-}
-
-method !term-from-node (Pod::FormattingCode $node) {
-    return $node.meta[0] || $.walker.text-contents-of($node);
-}
-
 method start-list (Int :$level, Bool :$numbered) {
     my $tag = $numbered ?? 'ol' !! 'ul';
     # This is a nested list, in which case we unclose to the <li> that
@@ -515,9 +497,5 @@ multi method start (Pod::Raw $node) {
 }
 
 method config (Pod::Config $node) {  }
-
-method index {
-    return %!index;
-}
 
 # vim: expandtab shiftwidth=4 ft=perl6
