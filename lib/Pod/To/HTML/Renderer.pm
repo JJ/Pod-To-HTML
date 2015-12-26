@@ -355,7 +355,7 @@ method handle-image-node (Pod::Block::Named $node) {
     unless $url.defined {
         die "Found an Image block, but don't know how to extract the image URL :(";
     }
-    
+
     self.render-start-tag( 'img', :src($url) );
 }
 
