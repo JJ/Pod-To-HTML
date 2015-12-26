@@ -42,7 +42,7 @@ subtest {
 
     like(
         $html,
-        rx:s{'<h1 id="Head1-0">' 'Head1' '</h1>'},
+        rx:s{'<h1 id="Head1">' 'Head1' '</h1>'},
         'html includes =head1 content with <h1> that has an id attribute'
     );
     like(

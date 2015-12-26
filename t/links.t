@@ -51,38 +51,38 @@ subtest {
 
     like(
         $html,
-        rx{'<a href="#INTERNAL1-0">INTERNAL1</a>'},
+        rx{'<a href="#INTERNAL1">INTERNAL1</a>'},
         'simple internal doc link with doc:'
     );
 
     like(
         $html,
-        rx{'<a href="#INTERNAL2-1">INTERNAL2</a>'},
+        rx{'<a href="#INTERNAL2">INTERNAL2</a>'},
         'simple internal doc link without doc:'
     );
 
     like(
         $html,
-        rx{'<a href="#INTERNAL1-0">Internal section 1</a>'},
+        rx{'<a href="#INTERNAL1">Internal section 1</a>'},
         'internal doc link with link text and doc:'
     );
 
     like(
         $html,
-        rx{'<a href="#INTERNAL2-1">Internal section 2</a>'},
+        rx{'<a href="#INTERNAL2">Internal section 2</a>'},
         'internal doc link with link text and without doc:'
     );
 
     like(
         $html,
-        rx{'<a href="#Has_C%3Cpod%3E-2">Has <code>pod</code></a>'},
+        rx{'<a href="#Has_C%3Cpod%3E">Has <code>pod</code></a>'},
         'internal doc link which contains Pod in the link text:'
     );
 
     todo( 'Rakudo misparses the corresponding pod - https://rt.perl.org/Ticket/Display.html?id=127029', 1 );
     like(
         $html,
-        rx{'<a href="#Has_C%3Cpod%3E-2">It has pod</a>'},
+        rx{'<a href="#Has_C%3Cpod%3E">It has pod</a>'},
         'internal doc link which contains Pod in the link and separate link text'
     );
 }, 'doc links';
@@ -101,13 +101,13 @@ subtest {
 
     like(
         $html,
-        rx{'<a href="#lexiphania-0">lexiphania</a>'},
+        rx{'<a href="#lexiphania">lexiphania</a>'},
         'simple defn link'
     );
 
     like(
         $html,
-        rx{'<a href="#lexiphania-0">the word lexiphania</a>'},
+        rx{'<a href="#lexiphania">the word lexiphania</a>'},
         'defn link with link text'
     );
 }, 'defn links';

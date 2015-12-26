@@ -28,22 +28,22 @@ subtest {
     like(
         $html,
         rx:s{
-            '<h1 id="Head1_with_spaces-0">Head1 with spaces</h1>'
+            '<h1 id="Head1_with_spaces">Head1 with spaces</h1>'
             .*
             '<p>'
-            'Link to <a href="#Head1_with_spaces-0">Head1 with spaces</a>'
+            'Link to <a href="#Head1_with_spaces">Head1 with spaces</a>'
             '</p>'
             .*
-            '<h1 id="Head1_with_C&lt;pod&gt;-1">Head1 with <code>pod</code></h1>'
+            '<h1 id="Head1_with_C&lt;pod&gt;">Head1 with <code>pod</code></h1>'
             .*
             '<p>'
-            'Link to <a href="#Head1_with_C%3Cpod%3E-1">Head1 with <code>pod</code></a>'
+            'Link to <a href="#Head1_with_C%3Cpod%3E">Head1 with <code>pod</code></a>'
             '</p>'
             .*
-            '<h1 id="Head1_with_B&lt;nested_C&lt;codes&gt;&gt;-2">Head1 with <strong>nested <code>codes</code></strong></h1>'
+            '<h1 id="Head1_with_B&lt;nested_C&lt;codes&gt;&gt;">Head1 with <strong>nested <code>codes</code></strong></h1>'
             .*
             '<p>'
-            'Link to <a href="#Head1_with_B%3Cnested_C%3Ccodes%3E%3E-2">Head1 with <strong>nested <code>codes</code></strong></a>'
+            'Link to <a href="#Head1_with_B%3Cnested_C%3Ccodes%3E%3E">Head1 with <strong>nested <code>codes</code></strong></a>'
             '</p>'
         },
         'expected html'
