@@ -62,10 +62,14 @@ method render-html {
 }
 
 method render-prelude returns Str:D {
-    return $!prelude
+    return self.prelude-template
         .subst( /'___TITLE___'/, $!title )
         .subst( /'___INLINE-STYLES___'/, self.inline-styles )
         .subst( /'___METADATA___'/, self.render-metadata );
+}
+
+method prelude-template {
+    return $!prelude;
 }
 
 method inline-styles {
