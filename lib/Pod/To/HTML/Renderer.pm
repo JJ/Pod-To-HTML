@@ -63,7 +63,7 @@ method render-html {
 
 method render-prelude returns Str:D {
     return self.prelude-template
-        .subst( /'___TITLE___'/, $!title )
+        .subst( /'___TITLE___'/, self.escape-html($!title) )
         .subst( /'___INLINE-STYLES___'/, self.inline-styles )
         .subst( /'___METADATA___'/, self.render-metadata );
 }
@@ -137,12 +137,12 @@ method render-toc {
 
 method render-title {
     return q{} unless $!title.chars;
-    return qq[<h1 class="title">{$!title}</h1>];
+    return qq[<h1 class="title">{self.escape-html($!title)}</h1>];
 }
 
 method render-subtitle {
     return q{} unless $!subtitle.chars;
-    return qq[<h2 class="subtitle">{$!subtitle}</h2>];
+    return qq[<h2 class="subtitle">{self.escape-html($!subtitle)}</h2>];
 }
 
 method render-footnotes {

@@ -81,4 +81,28 @@ subtest {
     );
 }, 'no title or subtitle passed to constructor';
 
+
+subtest {
+    my $pth = Pod::To::HTML::Renderer.new( :title('Contains >'), :subtitle('Contains <') );
+    my $html = $pth.pod-to-html($=pod);
+
+    like(
+        $html,
+        rx:s{'<head>' '<title>Contains &gt;</title>'},
+        'title is escaped in title tag'
+    );
+
+    like(
+        $html,
+        rx:s{'<h1 class="title">Contains &gt;</h1>'},
+        'title is escaped in h1 tag'
+    );
+
+    like(
+        $html,
+        rx:s{'<h2 class="subtitle">Contains &lt;</h2>'},
+        'subtitle is escaped in h2 tag'
+    );
+}, 'title and subtitle with characters that need to be HTML escaped';
+
 done-testing;
