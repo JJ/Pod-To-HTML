@@ -36,7 +36,7 @@ subtest {
 
     like(
         $html,
-        rx:s{'<h2 class="subtitle">' 'A Subtitle' '</h1>'},
+        rx:s{'<h2 class="subtitle">' 'A Subtitle' '</h2>'},
         q{subtitle passed to constructor is rendered as <h2> with a class of "subtitle"}
     );
 

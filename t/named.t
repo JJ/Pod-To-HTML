@@ -243,7 +243,7 @@ subtest {
              '<title>Title goes here</title>'
              .+
              '<h1 class="title">Title goes here</h1>'
-             '<h2 class="subtitle">Subtitle goes here</h1>'
+             '<h2 class="subtitle">Subtitle goes here</h2>'
            },
          'html content'
     );

@@ -142,7 +142,7 @@ method render-title {
 
 method render-subtitle {
     return q{} unless $!subtitle.chars;
-    return qq[<h2 class="subtitle">{$!subtitle}</h1>];
+    return qq[<h2 class="subtitle">{$!subtitle}</h2>];
 }
 
 method render-footnotes {
