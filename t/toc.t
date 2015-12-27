@@ -26,7 +26,7 @@ Yadda yadda.
 my $pod_i = 0;
 
 subtest {
-    my $pth = Pod::To::HTML::Renderer.new( :title('My Title'), :subtitle('A Subtitle') );
+    my $pth = Pod::To::HTML::Renderer.new;
     my $html = $pth.pod-to-html($=pod[$pod_i++]);
 
     like(
@@ -65,7 +65,7 @@ subtest {
 =end pod
 
 subtest {
-    my $pth = Pod::To::HTML::Renderer.new( :title('My Title'), :subtitle('A Subtitle') );
+    my $pth = Pod::To::HTML::Renderer.new;
     my $html = $pth.pod-to-html($=pod[$pod_i++]);
 
     like(
