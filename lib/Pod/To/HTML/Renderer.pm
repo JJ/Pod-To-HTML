@@ -115,15 +115,17 @@ method render-toc {
     my @pod;
     for @!toc -> $item {
         my $contents = $item<contents>;
-        $contents[0].contents.unshift: '#';
-
         @pod.push: Pod::Item.new(
             :config( :numbered('1') ),
             :level( $item<level> ),
             :contents(
                 Pod::FormattingCode.new(
                     :type('L'),
-                    :contents($contents),
+                    # It's very important that we not alter $contents here, as
+                    # that is part of the underlying $=pod structure, and any
+                    # changes we make to it here are permanent for the
+                    # lifetime of the program.
+                    :contents( [ ( '#', $contents.flat ).flat ] ),
                 ),
             ),
         );

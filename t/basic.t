@@ -10,11 +10,9 @@ Some text here.
 
 =end pod
 
-my $pod_i = 0;
-
 subtest {
     my $pth = Pod::To::HTML::Renderer.new( :title('My Title'), :subtitle('A Subtitle') );
-    my $html = $pth.pod-to-html($=pod[$pod_i]);
+    my $html = $pth.pod-to-html($=pod);
 
     like(
         $html,
@@ -53,8 +51,25 @@ subtest {
 }, 'basic HTML with title and subtitle passed to constructor';
 
 subtest {
+    my @html;
+    for 0..2 {
+        @html.append: Pod::To::HTML::Renderer.new.pod-to-html($=pod);
+    }
+
+    for (0..2).combinations(2) -> @combo {
+        my $first = @combo[0];
+        my $second = @combo[1];
+        is(
+            @html[$first],
+            @html[$second],
+            "iteration $first and $second are identical"
+        );
+    }
+}, 'pod-to-html produces the same output each time it is run on the same pod';
+
+subtest {
     my $pth = Pod::To::HTML::Renderer.new;
-    my $html = $pth.pod-to-html($=pod[$pod_i++]);
+    my $html = $pth.pod-to-html($=pod);
 
     unlike(
         $html,
