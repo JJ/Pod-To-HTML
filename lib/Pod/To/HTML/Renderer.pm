@@ -3,10 +3,10 @@ use Pod::To::HTML::InlineListener;
 unit class Pod::To::HTML::Renderer is Pod::To::HTML::InlineListener;
 
 has Bool $!include-toc;
-has Cool $!title;
-has Cool $!subtitle;
-has Cool $!prelude;
-has Cool $!postlude;
+has Str $!title;
+has Str $!subtitle;
+has Str $!prelude;
+has Str $!postlude;
 
 has Hash @!toc;
 has Pair @!meta;
@@ -15,11 +15,11 @@ has Bool $!render-paras = True;
 
 submethod BUILD (
     $class:
-    $!include-toc = True,
-    :$!title = q{},
-    :$!subtitle = q{},
-    :$!prelude? = $class.default-prelude,
-    :$!postlude? = $class.default-postlude,
+    Bool $!include-toc = True,
+    Str(Any) :$!title = q{},
+    Str(Any) :$!subtitle = q{},
+    Str(Any) :$!prelude? = $class.default-prelude,
+    Str(Any) :$!postlude? = $class.default-postlude,
 ) { }
 
 method pod-to-html ($pod) {
